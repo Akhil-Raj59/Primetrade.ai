@@ -61,7 +61,7 @@ const PostForm = ({ onSubmit, initialData = null, loading }) => {
         {initialData ? "Edit Post" : "Create Post"}
       </h3>
 
-      {/* Title */}
+      
       <div>
         <input
           type="text"
@@ -76,7 +76,7 @@ const PostForm = ({ onSubmit, initialData = null, loading }) => {
         )}
       </div>
 
-      {/* Content */}
+      
       <div>
         <textarea
           rows="4"
@@ -91,17 +91,17 @@ const PostForm = ({ onSubmit, initialData = null, loading }) => {
         )}
       </div>
 
-      {/* Tags */}
+      
       <div>
         <input
           type="text"
-          placeholder="Tags (comma separated)"
+          placeholder="Tags Optional (comma separated)"
           {...register("tags")}
           className="w-full border px-3 py-2 rounded-lg"
         />
       </div>
 
-      {/* Status */}
+      
       <div>
         <select
           {...register("status")}
@@ -112,7 +112,7 @@ const PostForm = ({ onSubmit, initialData = null, loading }) => {
         </select>
       </div>
 
-      {/* Image */}
+  
       <div>
         <input
           type="file"

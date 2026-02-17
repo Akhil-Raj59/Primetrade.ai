@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   const isAuthenticated = !!user;
 
-  // Restore session on app load
+
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("accessToken");

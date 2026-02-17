@@ -51,7 +51,7 @@ const Login = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Email */}
+          
           <div>
             <label className="block text-sm font-medium mb-1">
               Email
@@ -68,7 +68,7 @@ const Login = () => {
             )}
           </div>
 
-          {/* Password */}
+          
           <div>
             <label className="block text-sm font-medium mb-1">
               Password

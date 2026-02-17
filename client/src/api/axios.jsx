@@ -7,7 +7,6 @@ const axiosInstance = axios.create({
   withCredentials: false,
 });
 
-// Attach access token automatically
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
@@ -21,7 +20,7 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 globally
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

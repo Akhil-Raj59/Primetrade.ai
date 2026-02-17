@@ -11,10 +11,10 @@ import {
 const Dashboard = () => {
   const [postsData, setPostsData] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
 
   const [filters, setFilters] = useState({
     page: 1,
@@ -27,8 +27,6 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const response = await getPosts(filters);
-
-      // Adjust according to your backend response shape
       setPostsData(response.data?.posts || []);
       setTotalPages(response.data?.totalPages || 1);
     } catch (error) {
@@ -42,199 +40,143 @@ const Dashboard = () => {
     fetchPosts();
   }, [filters]);
 
-  // CREATE
-  const handleCreatePost = async (formData) => {
+  const openCreateModal = () => {
+    setEditingPost(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (post) => {
+    setEditingPost(post);
+    setIsModalOpen(true);
+  };
+
+  const handleFormSubmit = async (formData) => {
     setFormLoading(true);
     try {
-      await createPost(formData);
+      if (editingPost) {
+        await updatePost(editingPost._id, formData);
+      } else {
+        await createPost(formData);
+      }
+      setIsModalOpen(false);
       fetchPosts();
     } catch (error) {
-      console.error("Create failed", error);
+      console.error("Operation failed", error);
     } finally {
       setFormLoading(false);
     }
   };
 
-  // UPDATE
-  const handleUpdatePost = async (formData) => {
-    if (!editingPost) return;
-
-    setFormLoading(true);
-    try {
-      await updatePost(editingPost._id, formData);
-      setEditingPost(null);
-      fetchPosts();
-    } catch (error) {
-      console.error("Update failed", error);
-    } finally {
-      setFormLoading(false);
-    }
-  };
-
-  // DELETE
   const handleDeletePost = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this post?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      await deletePost(id);
-      fetchPosts();
-    } catch (error) {
-      console.error("Delete failed", error);
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        await deletePost(id);
+        fetchPosts();
+      } catch (error) {
+        console.error("Delete failed", error);
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <Navbar />
 
-      <div className="p-6 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">Your Posts</h2>
-
-        {/* Post Form */}
-        <div className="mb-10">
-          <PostForm
-            onSubmit={
-              editingPost ? handleUpdatePost : handleCreatePost
-            }
-            initialData={editingPost}
-            loading={formLoading}
-          />
+      <div className="p-6 max-w-7xl mx-auto">
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl font-extrabold text-gray-900">Dashboard</h2>
+            <p className="text-gray-500">Manage your content and posts</p>
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+          >
+            <span className="text-xl">+</span> Create New Post
+          </button>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          <input
-            type="text"
-            placeholder="Search posts..."
-            value={filters.search}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                search: e.target.value,
-                page: 1,
-              })
-            }
-            className="border px-3 py-2 rounded-lg w-64"
-          />
-
+        
+        <div className="bg-white p-4 rounded-2xl shadow-sm mb-8 flex flex-wrap gap-4 items-center">
+          <div className="flex-1 min-w-[250px]">
+            <input
+              type="text"
+              placeholder="Search by title..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
+              className="w-full border-gray-200 border px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            />
+          </div>
           <select
             value={filters.status}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                status: e.target.value,
-                page: 1,
-              })
-            }
-            className="border px-3 py-2 rounded-lg"
+            onChange={(e) => setFilters({ ...filters, status: e.target.value, page: 1 })}
+            className="border-gray-200 border px-4 py-2.5 rounded-xl bg-white outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="all">All</option>
+            <option value="all">All Status</option>
             <option value="published">Published</option>
             <option value="draft">Draft</option>
           </select>
         </div>
 
-        {/* Posts List */}
+      
         {loading ? (
-          <p>Loading posts...</p>
+          <div className="text-center py-20 text-gray-400 animate-pulse">Loading your posts...</div>
         ) : postsData.length === 0 ? (
-          <p className="text-gray-500">No posts found.</p>
+          <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+            <p className="text-gray-500 text-lg">No posts found. Start by creating one!</p>
+          </div>
         ) : (
-          <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {postsData.map((post) => (
-                <div
-                  key={post._id}
-                  className="bg-white shadow-md rounded-xl p-4"
-                >
-                  {post.image && (
-                    <img
-                      src={post.image}
-                      alt="post"
-                      className="w-full h-40 object-cover rounded-lg mb-3"
-                    />
-                  )}
-
-                  <h3 className="text-lg font-semibold">
-                    {post.title}
-                  </h3>
-
-                  <p className="text-sm text-gray-600 mt-2">
-                    {post.content?.slice(0, 100)}...
-                  </p>
-
-                  <div className="flex justify-between items-center mt-4">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        post.status === "published"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-yellow-100 text-yellow-600"
-                      }`}
-                    >
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {postsData.map((post) => (
+              <div key={post._id} className="group bg-white rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 overflow-hidden transition-all duration-300">
+                {post.image && (
+                  <div className="h-48 overflow-hidden">
+                    <img src={post.image} alt="post" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                )}
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className={`text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-lg ${post.status === "published" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
                       {post.status}
                     </span>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setEditingPost(post)}
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleDeletePost(post._id)
-                        }
-                        className="text-sm text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 line-clamp-1 mb-2">{post.title}</h3>
+                  <p className="text-gray-500 text-sm line-clamp-2 mb-6">{post.content}</p>
+                  
+                  <div className="flex gap-4 border-t pt-4">
+                    <button onClick={() => openEditModal(post)} className="flex-1 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Edit</button>
+                    <button onClick={() => handleDeletePost(post._id)} className="flex-1 text-sm font-bold text-red-500 hover:text-red-700 transition-colors">Delete</button>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-8 gap-3">
-              <button
-                disabled={filters.page === 1}
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    page: filters.page - 1,
-                  })
-                }
-                className="px-3 py-1 border rounded-lg disabled:opacity-50"
-              >
-                Prev
-              </button>
-
-              <span className="px-3 py-1">
-                Page {filters.page} of {totalPages}
-              </span>
-
-              <button
-                disabled={filters.page === totalPages}
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    page: filters.page + 1,
-                  })
-                }
-                className="px-3 py-1 border rounded-lg disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         )}
+
+    
       </div>
+
+      
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="relative bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="px-8 py-6 border-b flex justify-between items-center">
+              <h3 className="text-2xl font-bold text-gray-800">{editingPost ? "Edit Post" : "Create New Post"}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 text-2xl">&times;</button>
+            </div>
+            <div className="p-8 max-h-[75vh] overflow-y-auto">
+              <PostForm 
+                onSubmit={handleFormSubmit} 
+                initialData={editingPost} 
+                loading={formLoading} 
+                onCancel={() => setIsModalOpen(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -12,11 +12,11 @@ const PrivateRoute = ({ children }) => {
 const App = () => {
   return (
     <Routes>
-      {/* Public Routes */}
+      
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected Route */}
+      
       <Route
         path="/dashboard"
         element={
@@ -26,7 +26,7 @@ const App = () => {
         }
       />
 
-      {/* Default Route */}
+      
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );

@@ -59,7 +59,7 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Full Name */}
+          
           <div>
             <label className="block text-sm font-medium mb-1">
               Full Name
@@ -76,7 +76,7 @@ const Register = () => {
             )}
           </div>
 
-          {/* Email */}
+          
           <div>
             <label className="block text-sm font-medium mb-1">
               Email
@@ -93,7 +93,7 @@ const Register = () => {
             )}
           </div>
 
-          {/* Password */}
+          
           <div>
             <label className="block text-sm font-medium mb-1">
               Password
@@ -110,7 +110,7 @@ const Register = () => {
             )}
           </div>
 
-          {/* Avatar Upload */}
+          
           <div>
             <label className="block text-sm font-medium mb-1">
               Avatar
